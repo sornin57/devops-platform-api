@@ -109,6 +109,7 @@ def test_delete_unknown_service_returns_404():
     assert response.status_code == 404
     assert response.json()["detail"] == "Service not found"
 
+
 def test_filter_services_by_status():
     payload = {
         "name": "search-api",
@@ -141,6 +142,7 @@ def test_filter_services_with_invalid_status_returns_422():
     response = client.get("/api/services?status=broken")
 
     assert response.status_code == 422
+
 
 def test_info_returns_app_metadata():
     response = client.get("/api/info")

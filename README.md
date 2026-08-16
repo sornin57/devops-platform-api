@@ -18,6 +18,9 @@ Pour l'instant, le projet reste volontairement simple : les services sont stock�
 - Filtres par status et environment
 - Validation des donnees avec Pydantic
 - Tests avec pytest
+- Verification du style avec flake8
+- Verification des types avec mypy
+- CI GitHub Actions
 
 ## Structure
 
@@ -31,10 +34,15 @@ devops-platform-api/
 ├── tests/
 │   └── test_main.py
 ├── .dockerignore
+├── .flake8
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── .gitignore
 ├── Dockerfile
 ├── pytest.ini
 ├── README.md
+├── requirements-dev.txt
 └── requirements.txt
 ```
 
@@ -58,6 +66,12 @@ Installer les dependances :
 pip install -r requirements.txt
 ```
 
+Installer les dependances de developpement :
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 Lancer l'API en local :
 
 ```bash
@@ -74,6 +88,43 @@ Lancer les tests avec Python :
 
 ```bash
 python -m pytest
+```
+
+Verifier le style :
+
+```bash
+flake8 app tests
+```
+
+Verifier les types :
+
+```bash
+mypy app
+```
+
+Lancer tous les checks principaux :
+
+```bash
+flake8 app tests
+mypy app
+pytest
+```
+
+## CI GitHub Actions
+
+Le workflow `.github/workflows/ci.yml` se lance automatiquement sur :
+
+```text
+push sur main
+pull request
+```
+
+Il execute :
+
+```text
+flake8 app tests
+mypy app
+pytest
 ```
 
 ## Docker
