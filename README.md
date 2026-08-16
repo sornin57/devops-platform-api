@@ -16,6 +16,7 @@ Pour l'instant, le projet reste volontairement simple : les services sont stock√
 - Modification d'un service
 - Suppression d'un service
 - Filtres par status et environment
+- Protection des routes d'ecriture avec API key
 - Validation des donnees avec Pydantic
 - Tests avec pytest
 - Verification du style avec flake8
@@ -284,12 +285,38 @@ Valeurs par defaut :
 ```text
 APP_NAME=DevOps Platform API
 APP_ENV=development
+API_KEY=dev-secret-key
 ```
 
 Exemple pour lancer l'API avec un environnement different :
 
 ```bash
 APP_ENV=production uvicorn app.main:app --reload
+```
+
+## API key
+
+Les routes de lecture sont publiques :
+
+```text
+GET /health
+GET /api/info
+GET /api/services
+GET /api/services/{service_id}
+```
+
+Les routes d'ecriture demandent le header `X-API-Key` :
+
+```text
+POST /api/services
+PUT /api/services/{service_id}
+DELETE /api/services/{service_id}
+```
+
+Exemple de header :
+
+```text
+X-API-Key: dev-secret-key
 ```
 
 ## Endpoints
@@ -355,6 +382,7 @@ Creer un service :
 ```bash
 curl -X POST http://127.0.0.1:8000/api/services \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-secret-key" \
   -d '{
     "name": "payment-api",
     "status": "running",
@@ -368,6 +396,7 @@ Modifier un service :
 ```bash
 curl -X PUT http://127.0.0.1:8000/api/services/1 \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-secret-key" \
   -d '{
     "name": "auth-api",
     "status": "degraded",
@@ -379,7 +408,8 @@ curl -X PUT http://127.0.0.1:8000/api/services/1 \
 Supprimer un service :
 
 ```bash
-curl -X DELETE http://127.0.0.1:8000/api/services/2
+curl -X DELETE http://127.0.0.1:8000/api/services/2 \
+  -H "X-API-Key: dev-secret-key"
 ```
 
 ## Valeurs autorisees

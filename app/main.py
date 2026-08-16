@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from app.config import settings
 from app.schemas import (
     Service,
@@ -27,6 +27,11 @@ services: list[Service] = [
         environment="staging",
     ),
 ]
+
+
+def verify_api_key(x_api_key: str | None = Header(default=None)) -> None:
+    if x_api_key != settings.api_key:
+        raise HTTPException(status_code=403, detail="Invalid API key")
 
 
 @app.get("/health")
@@ -74,7 +79,10 @@ def get_service(service_id: int):
 
 
 @app.post("/api/services", response_model=Service, status_code=201)
-def create_service(service_data: ServiceCreate):
+def create_service(
+    service_data: ServiceCreate,
+    _: None = Depends(verify_api_key),
+):
     new_service = Service(
         id=len(services) + 1,
         name=service_data.name,
@@ -88,7 +96,11 @@ def create_service(service_data: ServiceCreate):
 
 
 @app.put("/api/services/{service_id}", response_model=Service)
-def update_service(service_id: int, service_data: ServiceCreate):
+def update_service(
+    service_id: int,
+    service_data: ServiceCreate,
+    _: None = Depends(verify_api_key),
+):
     for index, service in enumerate(services):
         if service.id == service_id:
             updated_service = Service(
@@ -106,7 +118,10 @@ def update_service(service_id: int, service_data: ServiceCreate):
 
 
 @app.delete("/api/services/{service_id}")
-def delete_service(service_id: int):
+def delete_service(
+    service_id: int,
+    _: None = Depends(verify_api_key),
+):
     for index, service in enumerate(services):
         if service.id == service_id:
             deleted_service = services.pop(index)

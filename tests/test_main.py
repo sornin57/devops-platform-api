@@ -4,6 +4,8 @@ from app.main import app
 
 
 client = TestClient(app)
+API_KEY_HEADERS = {"X-API-Key": "dev-secret-key"}
+INVALID_API_KEY_HEADERS = {"X-API-Key": "wrong-key"}
 
 
 def test_health_returns_ok():
@@ -44,7 +46,11 @@ def test_create_service_returns_created_service():
         "environment": "development",
     }
 
-    response = client.post("/api/services", json=payload)
+    response = client.post(
+        "/api/services",
+        json=payload,
+        headers=API_KEY_HEADERS,
+    )
 
     assert response.status_code == 201
     assert response.json()["name"] == payload["name"]
@@ -61,7 +67,11 @@ def test_update_service_returns_updated_service():
         "environment": "production",
     }
 
-    response = client.put("/api/services/1", json=payload)
+    response = client.put(
+        "/api/services/1",
+        json=payload,
+        headers=API_KEY_HEADERS,
+    )
 
     assert response.status_code == 200
     assert response.json()["id"] == 1
@@ -79,10 +89,17 @@ def test_delete_service_returns_deleted_service():
         "environment": "development",
     }
 
-    create_response = client.post("/api/services", json=payload)
+    create_response = client.post(
+        "/api/services",
+        json=payload,
+        headers=API_KEY_HEADERS,
+    )
     service_id = create_response.json()["id"]
 
-    delete_response = client.delete(f"/api/services/{service_id}")
+    delete_response = client.delete(
+        f"/api/services/{service_id}",
+        headers=API_KEY_HEADERS,
+    )
 
     assert delete_response.status_code == 200
     assert delete_response.json()["message"] == "Service deleted"
@@ -97,14 +114,21 @@ def test_update_unknown_service_returns_404():
         "environment": "development",
     }
 
-    response = client.put("/api/services/999", json=payload)
+    response = client.put(
+        "/api/services/999",
+        json=payload,
+        headers=API_KEY_HEADERS,
+    )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Service not found"
 
 
 def test_delete_unknown_service_returns_404():
-    response = client.delete("/api/services/999")
+    response = client.delete(
+        "/api/services/999",
+        headers=API_KEY_HEADERS,
+    )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Service not found"
@@ -118,7 +142,11 @@ def test_filter_services_by_status():
         "environment": "production",
     }
 
-    client.post("/api/services", json=payload)
+    client.post(
+        "/api/services",
+        json=payload,
+        headers=API_KEY_HEADERS,
+    )
 
     response = client.get("/api/services?status=running")
 
@@ -152,3 +180,56 @@ def test_info_returns_app_metadata():
         "app_name": "DevOps Platform API",
         "environment": "development",
     }
+
+
+def test_create_service_without_api_key_returns_403():
+    payload = {
+        "name": "secure-api",
+        "status": "running",
+        "version": "1.0.0",
+        "environment": "development",
+    }
+
+    response = client.post("/api/services", json=payload)
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Invalid API key"
+
+
+def test_create_service_with_invalid_api_key_returns_403():
+    payload = {
+        "name": "secure-api",
+        "status": "running",
+        "version": "1.0.0",
+        "environment": "development",
+    }
+
+    response = client.post(
+        "/api/services",
+        json=payload,
+        headers=INVALID_API_KEY_HEADERS,
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Invalid API key"
+
+
+def test_update_service_without_api_key_returns_403():
+    payload = {
+        "name": "auth-api",
+        "status": "running",
+        "version": "1.0.0",
+        "environment": "production",
+    }
+
+    response = client.put("/api/services/1", json=payload)
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Invalid API key"
+
+
+def test_delete_service_without_api_key_returns_403():
+    response = client.delete("/api/services/1")
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Invalid API key"
