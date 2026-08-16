@@ -22,6 +22,7 @@ Pour l'instant, le projet reste volontairement simple : les services sont stock�
 - Verification des types avec mypy
 - CI GitHub Actions
 - Publication de l'image Docker dans GitHub Container Registry
+- Deploiement Kubernetes local avec Docker Desktop
 
 ## Structure
 
@@ -32,6 +33,9 @@ devops-platform-api/
 │   ├── config.py
 │   ├── main.py
 │   └── schemas.py
+├── k8s/
+│   ├── deployment.yaml
+│   └── service.yaml
 ├── tests/
 │   └── test_main.py
 ├── .dockerignore
@@ -217,6 +221,60 @@ Tester l'image lancee depuis la registry :
 ```bash
 curl http://127.0.0.1:8000/health
 curl http://127.0.0.1:8000/api/info
+```
+
+## Kubernetes
+
+Le dossier `k8s/` contient les manifests Kubernetes pour deployer l'API en local avec Docker Desktop.
+
+Verifier que Kubernetes est disponible :
+
+```bash
+kubectl config get-contexts
+kubectl config use-context docker-desktop
+kubectl get nodes
+```
+
+Appliquer les manifests :
+
+```bash
+kubectl apply -f k8s/
+```
+
+Verifier le deploiement :
+
+```bash
+kubectl get deployments
+kubectl get pods
+kubectl get services
+```
+
+Ouvrir un acces local vers le Service Kubernetes :
+
+```bash
+kubectl port-forward service/devops-platform-api 8000:8000
+```
+
+Tester l'API via Kubernetes :
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/info
+```
+
+Reponse attendue pour `/api/info` :
+
+```json
+{
+  "app_name": "DevOps Platform API Kubernetes",
+  "environment": "kubernetes"
+}
+```
+
+Supprimer les ressources Kubernetes :
+
+```bash
+kubectl delete -f k8s/
 ```
 
 ## Variables d'environnement

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-platform-api
+  labels:
+    app: devops-platform-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-platform-api
+  template:
+    metadata:
+      labels:
+        app: devops-platform-api
+    spec:
+      containers:
+        - name: devops-platform-api
+          image: ghcr.io/sornin57/devops-platform-api:latest
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: APP_ENV
+              value: "kubernetes"
+            - name: APP_NAME
+              value: "DevOps Platform API Kubernetes"

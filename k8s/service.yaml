@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-platform-api
+  labels:
+    app: devops-platform-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: devops-platform-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
