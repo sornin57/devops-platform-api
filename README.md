@@ -21,6 +21,7 @@ Pour l'instant, le projet reste volontairement simple : les services sont stock√
 - Verification du style avec flake8
 - Verification des types avec mypy
 - CI GitHub Actions
+- Publication de l'image Docker dans GitHub Container Registry
 
 ## Structure
 
@@ -125,7 +126,8 @@ Il execute :
 flake8 app tests
 mypy app
 pytest
-docker build -t devops-platform-api .
+docker build
+docker push vers GitHub Container Registry sur main
 ```
 
 ## Docker
@@ -187,6 +189,35 @@ docker ps -a
 ```
 
 Note : `--rm` supprime automatiquement le container quand il s'arrete. Il ne supprime pas l'image Docker.
+
+## Registry Docker
+
+L'image Docker est publiee dans GitHub Container Registry apres un push sur `main`.
+
+Image :
+
+```text
+ghcr.io/sornin57/devops-platform-api:latest
+```
+
+Recuperer l'image depuis la registry :
+
+```bash
+docker pull ghcr.io/sornin57/devops-platform-api:latest
+```
+
+Lancer l'image depuis la registry :
+
+```bash
+docker run --rm -p 8000:8000 ghcr.io/sornin57/devops-platform-api:latest
+```
+
+Tester l'image lancee depuis la registry :
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/info
+```
 
 ## Variables d'environnement
 
