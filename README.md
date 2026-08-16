@@ -35,7 +35,9 @@ devops-platform-api/
 │   ├── main.py
 │   └── schemas.py
 ├── k8s/
+│   ├── configmap.yaml
 │   ├── deployment.yaml
+│   ├── secret.yaml
 │   └── service.yaml
 ├── tests/
 │   └── test_main.py
@@ -228,6 +230,15 @@ curl http://127.0.0.1:8000/api/info
 
 Le dossier `k8s/` contient les manifests Kubernetes pour deployer l'API en local avec Docker Desktop.
 
+La configuration Kubernetes est separee en deux parties :
+
+```text
+ConfigMap = APP_ENV et APP_NAME
+Secret    = API_KEY
+```
+
+Le Deployment utilise `imagePullPolicy: Always` pour recuperer la derniere image `latest` depuis GHCR lors du redemarrage des Pods.
+
 Verifier que Kubernetes est disponible :
 
 ```bash
@@ -270,6 +281,45 @@ Reponse attendue pour `/api/info` :
   "app_name": "DevOps Platform API Kubernetes",
   "environment": "kubernetes"
 }
+```
+
+Tester une route protegee sans API key :
+
+```bash
+curl -i -X POST http://127.0.0.1:8000/api/services \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "secure-k8s-api",
+    "status": "running",
+    "version": "1.0.0",
+    "environment": "production"
+  }'
+```
+
+Reponse attendue :
+
+```text
+HTTP/1.1 403 Forbidden
+```
+
+Tester une route protegee avec API key :
+
+```bash
+curl -i -X POST http://127.0.0.1:8000/api/services \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-secret-key" \
+  -d '{
+    "name": "secure-k8s-api",
+    "status": "running",
+    "version": "1.0.0",
+    "environment": "production"
+  }'
+```
+
+Reponse attendue :
+
+```text
+HTTP/1.1 201 Created
 ```
 
 Supprimer les ressources Kubernetes :

@@ -17,6 +17,7 @@ spec:
       containers:
         - name: devops-platform-api
           image: ghcr.io/sornin57/devops-platform-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
           readinessProbe:
@@ -31,8 +32,8 @@ spec:
               port: 8000
             initialDelaySeconds: 15
             periodSeconds: 20
-          env:
-            - name: APP_ENV
-              value: "kubernetes"
-            - name: APP_NAME
-              value: "DevOps Platform API Kubernetes"
+          envFrom:
+            - configMapRef:
+                name: devops-platform-api-config
+            - secretRef:
+                name: devops-platform-api-secret
