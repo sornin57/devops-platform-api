@@ -125,6 +125,7 @@ Il execute :
 flake8 app tests
 mypy app
 pytest
+docker build -t devops-platform-api .
 ```
 
 ## Docker
