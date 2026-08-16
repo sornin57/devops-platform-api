@@ -233,3 +233,13 @@ def test_delete_service_without_api_key_returns_403():
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Invalid API key"
+
+
+def test_contact_returns_portfolio_contact():
+    response = client.get("/api/contact")
+
+    assert response.status_code == 200
+    assert response.json()["owner"] == "msornin"
+    assert response.json()["project"] == "DevOps Platform API"
+    assert response.json()["message"] == "Call me maybe"
+    assert "Kubernetes" in response.json()["focus"]

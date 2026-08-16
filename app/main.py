@@ -47,6 +47,22 @@ def get_info():
     }
 
 
+@app.get("/api/contact")
+def get_contact():
+    return {
+        "owner": "msornin",
+        "project": "DevOps Platform API",
+        "focus": [
+            "Python",
+            "Docker",
+            "CI/CD",
+            "Kubernetes",
+            "Security",
+        ],
+        "message": "Call me maybe",
+    }
+
+
 @app.get("/api/services", response_model=list[Service])
 def get_services(
     status: ServiceStatus | None = None,
